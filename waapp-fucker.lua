@@ -146,9 +146,9 @@ local jobsSpam = jobsTab:AddSection({
 	Name = "Job Spam"
 })
 
-local jobsAfk = jobsTab:AddSection({
-	Name = "Job AFK"
-})
+-- local jobsAfk = jobsTab:AddSection({
+-- 	Name = "Job AFK"
+-- })
 
 local jobsSettings = jobsTab:AddSection({
 	Name = "Job Settings"
@@ -250,18 +250,58 @@ local itemsTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
+local itemsGears = itemsTab:AddSection({
+	Name = "Gears"
+})
+
 local itemsFood = itemsTab:AddSection({
 	Name = "Food"
 })
 
-for _, foodPart in pairs(ReplicatedStorage.StreamingFurnitureStorage["Stainless Refrigerator"].Food:GetChildren()) do
-	itemsFood:AddButton({
-		Name = foodPart.Name,
-		Callback = function()
-			foodPart.ClickDetector.Detector:FireServer()
-		end
-	})
+local food = {"Bloxy Cola", "Ice Cream", "Turkey Leg", "Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender"}
+local alreadyFood = {}
+
+for _, detectorRemote in pairs(Workspace.Houses:GetDescendants()) do
+	if detectorRemote:IsA("RemoteEvent") and detectorRemote.Name == "Detector" and table.find(food, detectorRemote.Parent.Parent.Name) and not table.find(alreadyFood, detectorRemote.Parent.Parent.Name) then
+		table.insert(alreadyFood, detectorRemote.Parent.Parent.Name)
+
+		itemsFood:AddButton({
+			Name = detectorRemote.Parent.Parent.Name,
+			Callback = function()
+				if detectorRemote.Parent.Parent.Name == "Blender" then
+					detectorRemote:FireServer()
+				end
+
+				detectorRemote:FireServer()
+			end
+		})
+	end
 end
+
+-- for _, foodPart in pairs(ReplicatedStorage.StreamingFurnitureStorage["Stainless Refrigerator"].Food:GetChildren()) do
+-- 	itemsFood:AddButton({
+-- 		Name = foodPart.Name,
+-- 		Callback = function()
+-- 			foodPart.ClickDetector.Detector:FireServer()
+-- 		end
+-- 	})
+-- end
+
+-- local food = {"Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender"}
+-- local alreadyFood = {}
+
+-- for _, remoteDetector in pairs(ReplicatedStorage.StreamingFurnitureStorage:GetDescendants()) do
+-- 	if remoteDetector:IsA("RemoteEvent") and table.find(food, remoteDetector.Parent.Parent.Name) and not table.find(alreadyFood, remoteDetector.Parent.Parent.Name) then
+-- 		table.insert(alreadyFood, remoteDetector.Parent.Parent.Name)
+
+-- 		itemsFood:AddButton({
+-- 			Name = remoteDetector.Parent.Parent.Name,
+-- 			Callback = function()
+-- 				remoteDetector:FireServer()
+-- 			end
+-- 		})
+-- 	end
+-- end
 
 local itemsUnicorn = itemsTab:AddSection({
 	Name = "Unicorn"
