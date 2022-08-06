@@ -301,14 +301,13 @@ miscOther:AddButton({
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
 			if tool:IsA("Tool") then
-				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
+				tool:Destroy()
 			end
 		end
 
 		for _, tool in pairs(localPlayer.Backpack:GetChildren()) do
-			if tool:IsA("Tool") and tool:FindFirstChild("AssetId") then
-				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
-				print(tool.Name)
+			if tool:IsA("Tool") then
+				tool:Destroy()
 			end
 		end
   	end
