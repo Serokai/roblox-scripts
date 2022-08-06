@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
@@ -105,7 +106,14 @@ for _, job in pairs(jobs) do
 	jobsTeleporters:AddButton({
 		Name = job,
 		Callback = function()
-			ReplicatedStorage.PlayerChannel:FireServer("TeleportToJob", job)
+            if job == "On Break" then
+				ReplicatedStorage.PlayerChannel:FireServer("ChangeJob", "On Break")
+            elseif Workspace.JobButtons[job] then
+                local jobButtonPosition = Workspace.JobButtons[job].Position
+                Workspace.JobButtons[job].Position = localPlayer.Character.HumanoidRootPart.Position
+                task.wait(0.025)
+                Workspace.JobButtons[job].Position = jobButtonPosition
+            end
 		end
 	})
 end
@@ -148,20 +156,14 @@ local locationsTab = wappWindow:MakeTab({
 })
 
 for _, value in ipairs(locations) do
+    local dropdownLocations = {}
+
 	local zoneSection = locationsTab:AddSection({
 		Name = value["Name"]
 	})
 
-	zoneSection:AddDropdown({
-		Name = value["Name" .. " Teleporters"],
-		Default = "1",
-		Options = {"1", "2"},
-		Callback = function(Value)
-			print(Value)
-		end
-	})
-
 	for _, areaValue in pairs(value["Locations"]) do
+        table.insert(dropdownLocations, areaValue[1])
 		zoneSection:AddButton({
 			Name = areaValue[1],
 			Callback = function()
