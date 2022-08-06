@@ -52,7 +52,7 @@ local wappWindow = OrionLib:MakeWindow({
     Name = "🍕 · WAAPP Fucker",
     HidePremium = false,
     SaveConfig = false,
-    ConfigFolder = "Waapp-Fucker",
+    ConfigFolder = "waaap-fucker-cfg",
     IntroEnabled = false
 }) 
 
@@ -233,6 +233,63 @@ local miscTab = wappWindow:MakeTab({
 	Name = "Miscellaneous",
 	Icon = "rbxassetid://6034509993",
 	PremiumOnly = false
+})
+
+local miscFun = miscTab:AddSection({
+	Name = "Fun"
+})
+
+for _, unicorn in pairs(localPlayer.Backpack:GetChildren("FluffyUnicorn")) do
+	print("unicorn destroyed")
+	ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", unicorn)
+end
+
+local UNICORN_LOOP_DELAY = 0.5
+local spamUnicorn = false
+
+local unicornToggle = miscFun:AddToggle({
+	Name = "Unicorn Spam [U]",
+	Default = false,
+	Callback = function(state)
+		spamUnicorn = state
+
+		while spamUnicorn and task.wait(UNICORN_LOOP_DELAY) do
+			print("respawning")
+
+			ReplicatedStorage.PlayerChannel:FireServer("GiveItem", 84012460)
+			mouse1click()
+			task.defer(function()
+				task.wait(UNICORN_LOOP_DELAY)
+				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", localPlayer.Backpack["Fluffy Unicorn"])
+			end)
+		end
+	end
+})
+
+miscFun:AddBind({
+	Name = "Unicorn Keybind",
+	Default = Enum.KeyCode.U,
+	Hold = false,
+	Callback = function()
+		if spamUnicorn == true then
+			unicornToggle:Set(false)
+		else
+			unicornToggle:Set(true)
+		end
+	end
+})
+
+miscFun:AddSlider({
+	Name = "Delay",
+	Min = 0.05,
+	Max = 1,
+	Default = 0.5,
+	Color = Color3.fromRGB(238, 15, 238),
+	Increment = 0.05,
+	ValueName = "Second(s)",
+	Callback = function(delaySeconds)
+		UNICORN_LOOP_DELAY = delaySeconds
+	end
 })
 
 OrionLib:Init()
