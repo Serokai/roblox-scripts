@@ -58,7 +58,7 @@ local wappWindow = OrionLib:MakeWindow({
 
 local playerTab = wappWindow:MakeTab({
 	Name = "Player",
-	Icon = "rbxassetid://10491204278",
+	Icon = "rbxassetid://6034287594",
 	PremiumOnly = false
 })
 
@@ -90,7 +90,7 @@ playerTab:AddSlider({
 
 local jobsTab = wappWindow:MakeTab({
 	Name = "Jobs",
-	Icon = "rbxassetid://10491182048",
+	Icon = "rbxassetid://6031075939",
 	PremiumOnly = false
 })
 
@@ -121,7 +121,6 @@ local function changeJob(job)
 		local jobButtonPosition = jobButton.Position
 		jobButton.Position = localPlayer.Character.HumanoidRootPart.Position
 		task.wait(0.025)
-
 
 		jobButton.HumanoidBillboardGui.Enabled = true
 		jobButton.Transparency = 0
@@ -179,7 +178,7 @@ jobsSettings:AddToggle({
 
 local locationsTab = wappWindow:MakeTab({
 	Name = "Locations",
-	Icon = "rbxassetid://10491184688",
+	Icon = "rbxassetid://6034684937",
 	PremiumOnly = false
 })
 
@@ -203,13 +202,13 @@ end
 
 local autofarmTab = wappWindow:MakeTab({
 	Name = "Autofarm",
-	Icon = "rbxassetid://10491183576",
+	Icon = "rbxassetid://6035202043",
 	PremiumOnly = false
 })
 
 local miscTab = wappWindow:MakeTab({
 	Name = "Miscellaneous",
-	Icon = "rbxassetid://10491180543",
+	Icon = "rbxassetid://6034509993",
 	PremiumOnly = false
 })
 
