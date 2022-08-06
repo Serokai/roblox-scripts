@@ -44,24 +44,6 @@ local locations = {
     }
 }
 
--- local items = {
--- 	[1] = {
--- 		Name = "Equipments",
--- 		Instances = {
--- 			["Fire Exting"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Ice Cream"].ClickDetector.Detector:FireServer(),
-
--- 		},
--- 	},
-
--- 	[2] = {
--- 		Name = "Food",
--- 		Instances = {
--- 			["Ice Cream"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Ice Cream"].ClickDetector.Detector:FireServer(),
--- 			["Bloxy Cola"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Bloxy Cola"].ClickDetector.Detector:FireServer(),
--- 		}
--- 	},
--- }
-
 local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"}
 local JOB_LOOP_DELAY = 0.25
 local jobLoop = false
@@ -121,7 +103,7 @@ local function GetPlayers()
 	return players
 end
 
-playerTab:AddDropdown({
+local playerTeleportDropdown = playerTab:AddDropdown({
 	Name = "Teleport to Player",
 	Default = "...",
 	Options = GetPlayers(),
@@ -258,54 +240,69 @@ local itemsFood = itemsTab:AddSection({
 	Name = "Food"
 })
 
-local food = {"Bloxy Cola", "Ice Cream", "Turkey Leg", "Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender"}
-local alreadyFood = {}
+local itemsUnicorn = itemsTab:AddSection({
+	Name = "Unicorn"
+})
+
+local itemsOthers = itemsTab:AddSection({
+	Name = "Others"
+})
+
+local food = {"Bloxy Cola", "Ice Cream", "Turkey Leg", "Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender", "Pizza", "Witch's Brew", "Sprite", "Dr Pepper", "Coke", "Monster", "Mountain Dews", "Pepsi", "Grill"}
+local sodas = {"Sprite", "Dr Pepper", "Coke", "Monster", "Mountain Dews", "Pepsi"}
+local foundFood = {}
+
+local gears = {
+	["Fire Extinguisher"] = Workspace.Extinguisher.Extinguisher.ClickDetector.Detector
+}
+local foundGear = {}
+
+local function findSoda(soda)
+	for _, instance in pairs(Workspace:GetChildren()) do
+		if instance.Name == "SodaTemplate" and instance:IsA("Tool") then
+			print("soda template found")
+			if instance.SodaName.Value == soda then
+				return instance
+			end
+		end
+	end
+
+	return nil
+end
 
 for _, detectorRemote in pairs(Workspace.Houses:GetDescendants()) do
-	if detectorRemote:IsA("RemoteEvent") and detectorRemote.Name == "Detector" and table.find(food, detectorRemote.Parent.Parent.Name) and not table.find(alreadyFood, detectorRemote.Parent.Parent.Name) then
-		table.insert(alreadyFood, detectorRemote.Parent.Parent.Name)
+	if detectorRemote:IsA("RemoteEvent") and detectorRemote.Name == "Detector" and table.find(food, detectorRemote.Parent.Parent.Name) and not table.find(foundFood, detectorRemote.Parent.Parent.Name) then
+		local instance = detectorRemote.Parent.Parent
+		table.insert(foundFood, instance)
 
 		itemsFood:AddButton({
-			Name = detectorRemote.Parent.Parent.Name,
+			Name = instance.Name,
 			Callback = function()
-				if detectorRemote.Parent.Parent.Name == "Blender" then
+				detectorRemote:FireServer()
+
+				if instance.Name == "Blender" then
 					detectorRemote:FireServer()
 				end
 
-				detectorRemote:FireServer()
+				if table.find(sodas, instance.Name) then
+					task.wait(1)
+
+					if findSoda(instance.Name) == nil then return end
+					findSoda(instance.Name).Handle.Position = localPlayer.Character.HumanoidRootPart.Position
+				end
 			end
 		})
 	end
 end
 
--- for _, foodPart in pairs(ReplicatedStorage.StreamingFurnitureStorage["Stainless Refrigerator"].Food:GetChildren()) do
--- 	itemsFood:AddButton({
--- 		Name = foodPart.Name,
--- 		Callback = function()
--- 			foodPart.ClickDetector.Detector:FireServer()
--- 		end
--- 	})
--- end
-
--- local food = {"Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender"}
--- local alreadyFood = {}
-
--- for _, remoteDetector in pairs(ReplicatedStorage.StreamingFurnitureStorage:GetDescendants()) do
--- 	if remoteDetector:IsA("RemoteEvent") and table.find(food, remoteDetector.Parent.Parent.Name) and not table.find(alreadyFood, remoteDetector.Parent.Parent.Name) then
--- 		table.insert(alreadyFood, remoteDetector.Parent.Parent.Name)
-
--- 		itemsFood:AddButton({
--- 			Name = remoteDetector.Parent.Parent.Name,
--- 			Callback = function()
--- 				remoteDetector:FireServer()
--- 			end
--- 		})
--- 	end
--- end
-
-local itemsUnicorn = itemsTab:AddSection({
-	Name = "Unicorn"
-})
+for gearName, remoteDetector in pairs(gears) do
+	itemsGears:AddButton({
+		Name = gearName,
+		Callback = function()
+			remoteDetector:FireServer()
+		end
+	})
+end
 
 local unicornToggle = itemsUnicorn:AddToggle({
 	Name = "Unicorn Spam [U]",
@@ -350,23 +347,7 @@ itemsUnicorn:AddSlider({
 	end
 })
 
-local autofarmTab = wappWindow:MakeTab({
-	Name = "Autofarm",
-	Icon = "rbxassetid://6035202043",
-	PremiumOnly = false
-})
-
-local miscTab = wappWindow:MakeTab({
-	Name = "Miscellaneous",
-	Icon = "rbxassetid://6034509993",
-	PremiumOnly = false
-})
-
-local miscOther = miscTab:AddSection({
-	Name = "Others"
-})
-
-miscOther:AddButton({
+itemsOthers:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
@@ -382,5 +363,58 @@ miscOther:AddButton({
 		end
   	end
 })
+
+local autofarmTab = wappWindow:MakeTab({
+	Name = "Autofarm",
+	Icon = "rbxassetid://6035202043",
+	PremiumOnly = false
+})
+
+local killTab = wappWindow:MakeTab({
+	Name = "Kill",
+	Icon = "rbxassetid://6034989550",
+	PremiumOnly = false
+})
+
+local function getSharkHouse()
+	for _, houseInstance in pairs(Workspace.Houses:GetDescendants()) do
+		if houseInstance.Name == "Shark" and houseInstance:FindFirstChild("BodyGyro") then
+			return houseInstance:FindFirstAncestor("Furniture").Parent.Name
+		end
+	end
+
+	return nil
+end
+
+local function killPlayer(playerName)
+	if Players:FindFirstChild(playerName) then
+		Workspace.Houses[getSharkHouse()].Furniture["Shark Tank"].TouchEvent:FireServer(Workspace:FindFirstChild(playerName).Head, Workspace.Houses[getSharkHouse()].Furniture["Shark Tank"].Shark)
+	end
+end
+
+local killDropdown = killTab:AddDropdown({
+	Name = "Kill Player",
+	Default = "...",
+	Options = GetPlayers(),
+	Callback = function(player)
+		killPlayer(player)
+	end
+})
+
+local miscTab = wappWindow:MakeTab({
+	Name = "Miscellaneous",
+	Icon = "rbxassetid://6034509993",
+	PremiumOnly = false
+})
+
+Players.PlayerAdded:Connect(function(player)
+	killDropdown:Refresh(GetPlayers(), true)
+	playerTeleportDropdown:Refresh(GetPlayers(), true)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	killDropdown:Refresh(GetPlayers(), true)
+	playerTeleportDropdown:Refresh(GetPlayers(), true)
+end)
 
 OrionLib:Init()
