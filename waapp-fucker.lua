@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -7,28 +6,41 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
 local localPlayer = Players.LocalPlayer
 
 local locations = {
-	[1] = {
-		["Name"] = "Pizza Place",
-		["Locations"] = {
-			[1] = {"Cashier Area", ("44, 4, 81")},
-			[2] = {"Cooking Area", ("44, 4, 66")},
-		}
-	},
-	[2] = {
-		["Name"] = "Islands",
-		["Locations"] = {
-			[1] = {"Pirate Island", ("-953, 8, 685")},
-			[2] = {"Treasure Island", ("-1761, 100, -1333")}
-		}
-
-	},
-	[3] = {
-		["Name"] = "Miscellaneous",
-		["Locations"] = {
-			[1] = {"Spawn Area", ("47, 3, 185")},
-			[2] = {"Skeleton Cave", ("-251, -23, -950")}
-		}
-	}
+    [1] = {
+        ["Name"] = "Pizza Place",
+        ["Locations"] = {
+            [1] = {"Cashier Area", ("44, 4, 81")},
+            [2] = {"Cooking Area", ("44, 4, 66")},
+            [3] = {"Boxing Area", ("47, 4, 20")},
+            [4] = {"Delivering Area", ("59, 4, -18")},
+            [5] = {"Supplying Area", ("7, 13, -1032")},
+            [6] = {"Manager Office", ("37, 4, 6")},
+            [7] = {"Kick Manager", ("16, 4, 21")},
+            [8] = {"Unloading Area", ("20, 9, -20")},
+            [9] = {"Hideout", ("76, 10, 66")},
+            [10] = {"Parking Lots", ("66, 3, -80")}
+        }
+    },
+    [2] = {
+        ["Name"] = "Islands",
+        ["Locations"] = {
+            [1] = {"Pirate Island", ("-953, 8, 685")},
+            [2] = {"Treasure Island", ("-1761, 100, -1333")},
+            [3] = {"Jordan's Island", ("1520, 0, 1359")}
+        }
+    },
+    [3] = {
+        ["Name"] = "Miscellaneous",
+        ["Locations"] = {
+            [1] = {"Spawn Area", ("47, 3, 185")},
+            [2] = {"Skeleton Cave", ("-251, -23, -950")},
+            [3] = {"The Dump", ("37, 3, -182")},
+            [4] = {"Party Island", ("81, 3, -276")},
+            [5] = {"Port", ("-477, 3, -355")},
+            [6] = {"Krusty Crab Game", ("-478, -22, -544 ")},
+            [7] = {"Treasure Chest", ("-1765, 6, -1275")}
+        }
+    }
 }
 
 local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"}
