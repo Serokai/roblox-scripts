@@ -64,7 +64,7 @@ local playerTab = wappWindow:MakeTab({
 
 playerTab:AddSlider({
 	Name = "Walkspeed",
-	Min = 5,
+	Min = 1,
 	Max = 150,
 	Default = 16,
 	Color = Color3.fromRGB(39, 165, 223),
@@ -98,18 +98,34 @@ local jobsTeleporters = jobsTab:AddSection({
 	Name = "Select Job"
 })
 
-local jobsFun = jobsTab:AddSection({
-	Name = "Job Loop"
+local jobsSpam = jobsTab:AddSection({
+	Name = "Job Spam"
+})
+
+local jobsAfk = jobsTab:AddSection({
+	Name = "Job AFK"
+})
+
+local jobsSettings = jobsTab:AddSection({
+	Name = "Job Settings"
 })
 
 local function changeJob(job)
 	if job == "On Break" then
 		ReplicatedStorage.PlayerChannel:FireServer("ChangeJob", "On Break")
 	elseif Workspace.JobButtons[job] then
-		local jobButtonPosition = Workspace.JobButtons[job].Position
-		Workspace.JobButtons[job].Position = localPlayer.Character.HumanoidRootPart.Position
+		local jobButton = Workspace.JobButtons[job]
+		jobButton.Transparency = 1
+		jobButton.HumanoidBillboardGui.Enabled = false
+
+		local jobButtonPosition = jobButton.Position
+		jobButton.Position = localPlayer.Character.HumanoidRootPart.Position
 		task.wait(0.025)
-		Workspace.JobButtons[job].Position = jobButtonPosition
+
+
+		jobButton.HumanoidBillboardGui.Enabled = true
+		jobButton.Transparency = 0
+		jobButton.Position = jobButtonPosition
 	end
 end
 
@@ -122,8 +138,8 @@ for _, job in pairs(jobs) do
 	})
 end
 
-jobsFun:AddToggle({
-	Name = "Enable Loop",
+jobsSpam:AddToggle({
+	Name = "Spam",
 	Default = false,
 	Callback = function(state)
 		jobLoop = state
@@ -140,7 +156,7 @@ jobsFun:AddToggle({
 	end
 })
 
-jobsFun:AddSlider({
+jobsSpam:AddSlider({
 	Name = "Delay",
 	Min = 0.05,
 	Max = 1,
@@ -150,6 +166,14 @@ jobsFun:AddSlider({
 	ValueName = "Second(s)",
 	Callback = function(delaySeconds)
 		JOB_LOOP_DELAY = delaySeconds
+	end
+})
+
+jobsSettings:AddToggle({
+	Name = "Notifications",
+	Default = true,
+	Callback = function(state)
+		localPlayer.PlayerGui.MainGui.Notifications.JobChange.Visible = state
 	end
 })
 
