@@ -152,6 +152,15 @@ for _, value in ipairs(locations) do
 		Name = value["Name"]
 	})
 
+	zoneSection:AddDropdown({
+		Name = value["Name" .. " Teleporters"],
+		Default = "1",
+		Options = {"1", "2"},
+		Callback = function(Value)
+			print(Value)
+		end
+	})
+
 	for _, areaValue in pairs(value["Locations"]) do
 		zoneSection:AddButton({
 			Name = areaValue[1],
