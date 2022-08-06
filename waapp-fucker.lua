@@ -300,14 +300,14 @@ miscOther:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
-			if tool:IsA("Tool") then
-				tool:Destroy()
+			if tool:IsA("Tool")then
+				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
 			end
 		end
 
 		for _, tool in pairs(localPlayer.Backpack:GetChildren()) do
 			if tool:IsA("Tool") then
-				tool:Destroy()
+				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
 			end
 		end
   	end
