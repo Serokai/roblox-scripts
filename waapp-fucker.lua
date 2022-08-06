@@ -1,0 +1,165 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local localPlayer = Players.LocalPlayer
+
+local locations = {
+	[1] = {
+		["Name"] = "Pizza Place",
+		["Locations"] = {
+			[1] = {"Cashier Area", ("44, 4, 81")},
+			[2] = {"Cooking Area", ("44, 4, 66")},
+		}
+	},
+	[2] = {
+		["Name"] = "Islands",
+		["Locations"] = {
+			[1] = {"Pirate Island", ("-953, 8, 685")},
+			[2] = {"Treasure Island", ("-1761, 100, -1333")}
+		}
+
+	},
+	[3] = {
+		["Name"] = "Miscellaneous",
+		["Locations"] = {
+			[1] = {"Spawn Area", ("47, 3, 185")},
+			[2] = {"Skeleton Cave", ("-251, -23, -950")}
+		}
+	}
+}
+
+local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"}
+local JOB_LOOP_DELAY = 0.25
+local jobLoop = false
+
+local wappWindow = OrionLib:MakeWindow({
+    Name = "🍕 · WAAPP Fucker",
+    HidePremium = false,
+    SaveConfig = false,
+    ConfigFolder = "Waapp-Fucker",
+    IntroEnabled = false
+}) 
+
+local playerTab = wappWindow:MakeTab({
+	Name = "Player",
+	Icon = "rbxassetid://10491204278",
+	PremiumOnly = false
+})
+
+playerTab:AddSlider({
+	Name = "Walkspeed",
+	Min = 5,
+	Max = 150,
+	Default = 16,
+	Color = Color3.fromRGB(39, 165, 223),
+	Increment = 1,
+	ValueName = "Speed",
+	Callback = function(walkSpeed)
+		localPlayer.Character.Humanoid.WalkSpeed = walkSpeed
+	end
+})
+
+playerTab:AddSlider({
+	Name = "Jump Power",
+	Min = 1,
+	Max = 350,
+	Default = 50,
+	Color = Color3.fromRGB(25, 242, 9),
+	Increment = 5,
+	ValueName = "Jump Power",
+	Callback = function(jumpPower)
+		localPlayer.Character.Humanoid.JumpPower = jumpPower
+	end
+})
+
+local jobsTab = wappWindow:MakeTab({
+	Name = "Jobs",
+	Icon = "rbxassetid://10491182048",
+	PremiumOnly = false
+})
+
+local jobsTeleporters = jobsTab:AddSection({
+	Name = "Select Job"
+})
+
+local jobsFun = jobsTab:AddSection({
+	Name = "Job Loop"
+})
+
+for _, job in pairs(jobs) do
+	jobsTeleporters:AddButton({
+		Name = job,
+		Callback = function()
+			ReplicatedStorage.PlayerChannel:FireServer("TeleportToJob", job)
+		end
+	})
+end
+
+jobsFun:AddToggle({
+	Name = "Enable Loop",
+	Default = false,
+	Callback = function(state)
+		jobLoop = state
+		local jobNumber = 1
+
+		while jobLoop and task.wait(JOB_LOOP_DELAY) do
+			ReplicatedStorage.PlayerChannel:FireServer("TeleportToJob", jobs[jobNumber])
+			if jobNumber >= 6 then
+				jobNumber = 1
+			else
+				jobNumber += 1
+			end
+		end
+	end
+})
+
+jobsFun:AddSlider({
+	Name = "Delay",
+	Min = 0.05,
+	Max = 1,
+	Default = 0.5,
+	Color = Color3.fromRGB(255, 30, 0),
+	Increment = 0.05,
+	ValueName = "Second(s)",
+	Callback = function(delaySeconds)
+		JOB_LOOP_DELAY = delaySeconds
+	end
+})
+
+local locationsTab = wappWindow:MakeTab({
+	Name = "Locations",
+	Icon = "rbxassetid://10491184688",
+	PremiumOnly = false
+})
+
+for _, value in ipairs(locations) do
+	local zoneSection = locationsTab:AddSection({
+		Name = value["Name"]
+	})
+
+	for _, areaValue in pairs(value["Locations"]) do
+		zoneSection:AddButton({
+			Name = areaValue[1],
+			Callback = function()
+				localPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(areaValue[2]:match("(.+), (.+), (.+)")))
+			end
+		})
+	end
+end
+
+local autofarmTab = wappWindow:MakeTab({
+	Name = "Autofarm",
+	Icon = "rbxassetid://10491183576",
+	PremiumOnly = false
+})
+
+local miscTab = wappWindow:MakeTab({
+	Name = "Miscellaneous",
+	Icon = "rbxassetid://10491180543",
+	PremiumOnly = false
+})
+
+OrionLib:Init()
