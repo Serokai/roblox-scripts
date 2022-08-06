@@ -44,6 +44,24 @@ local locations = {
     }
 }
 
+-- local items = {
+-- 	[1] = {
+-- 		Name = "Equipments",
+-- 		Instances = {
+-- 			["Fire Exting"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Ice Cream"].ClickDetector.Detector:FireServer(),
+
+-- 		},
+-- 	},
+
+-- 	[2] = {
+-- 		Name = "Food",
+-- 		Instances = {
+-- 			["Ice Cream"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Ice Cream"].ClickDetector.Detector:FireServer(),
+-- 			["Bloxy Cola"] = GetRefrigeratorHouse.Furniture["Stainless Refrigerator"].Food["Bloxy Cola"].ClickDetector.Detector:FireServer(),
+-- 		}
+-- 	},
+-- }
+
 local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"}
 local JOB_LOOP_DELAY = 0.25
 local jobLoop = false
@@ -226,27 +244,30 @@ for _, value in ipairs(locations) do
 	end
 end
 
-local autofarmTab = wappWindow:MakeTab({
-	Name = "Autofarm",
-	Icon = "rbxassetid://6035202043",
+local itemsTab = wappWindow:MakeTab({
+	Name = "Items",
+	Icon = "rbxassetid://6035056487",
 	PremiumOnly = false
 })
 
-local miscTab = wappWindow:MakeTab({
-	Name = "Miscellaneous",
-	Icon = "rbxassetid://6034509993",
-	PremiumOnly = false
+local itemsFood = itemsTab:AddSection({
+	Name = "Food"
 })
 
-local miscUnicorn = miscTab:AddSection({
+for _, foodPart in pairs(ReplicatedStorage.StreamingFurnitureStorage["Stainless Refrigerator"].Food:GetChildren()) do
+	itemsFood:AddButton({
+		Name = foodPart.Name,
+		Callback = function()
+			foodPart.ClickDetector.Detector:FireServer()
+		end
+	})
+end
+
+local itemsUnicorn = itemsTab:AddSection({
 	Name = "Unicorn"
 })
 
-local miscOther = miscTab:AddSection({
-	Name = "Others"
-})
-
-local unicornToggle = miscUnicorn:AddToggle({
+local unicornToggle = itemsUnicorn:AddToggle({
 	Name = "Unicorn Spam [U]",
 	Default = false,
 	Callback = function(state)
@@ -263,7 +284,7 @@ local unicornToggle = miscUnicorn:AddToggle({
 	end
 })
 
-miscUnicorn:AddBind({
+itemsUnicorn:AddBind({
 	Name = "Unicorn Keybind",
 	Default = Enum.KeyCode.U,
 	Hold = false,
@@ -276,7 +297,7 @@ miscUnicorn:AddBind({
 	end
 })
 
-miscUnicorn:AddSlider({
+itemsUnicorn:AddSlider({
 	Name = "Delay",
 	Min = 0.05,
 	Max = 1,
@@ -289,18 +310,27 @@ miscUnicorn:AddSlider({
 	end
 })
 
-miscOther:AddButton({
-	Name = "Fire Extinguisher",
-	Callback = function()
-		Workspace.Extinguisher.Extinguisher.ClickDetector.Detector:FireServer()
-  	end
+local autofarmTab = wappWindow:MakeTab({
+	Name = "Autofarm",
+	Icon = "rbxassetid://6035202043",
+	PremiumOnly = false
+})
+
+local miscTab = wappWindow:MakeTab({
+	Name = "Miscellaneous",
+	Icon = "rbxassetid://6034509993",
+	PremiumOnly = false
+})
+
+local miscOther = miscTab:AddSection({
+	Name = "Others"
 })
 
 miscOther:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
-			if tool:IsA("Tool")then
+			if tool:IsA("Tool") then
 				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
 			end
 		end
