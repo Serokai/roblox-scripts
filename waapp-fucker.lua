@@ -297,6 +297,13 @@ miscOther:AddButton({
 				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
 			end
 		end
+
+		for _, tool in pairs(localPlayer.Backpack:GetChildren()) do
+			if tool:IsA("Tool") and tool:FindFirstChild("AssetId") then
+				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
+				print(tool.Name)
+			end
+		end
   	end
 })
 
