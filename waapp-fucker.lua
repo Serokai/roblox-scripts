@@ -102,18 +102,22 @@ local jobsFun = jobsTab:AddSection({
 	Name = "Job Loop"
 })
 
+local function changeJob(job)
+	if job == "On Break" then
+		ReplicatedStorage.PlayerChannel:FireServer("ChangeJob", "On Break")
+	elseif Workspace.JobButtons[job] then
+		local jobButtonPosition = Workspace.JobButtons[job].Position
+		Workspace.JobButtons[job].Position = localPlayer.Character.HumanoidRootPart.Position
+		task.wait(0.025)
+		Workspace.JobButtons[job].Position = jobButtonPosition
+	end
+end
+
 for _, job in pairs(jobs) do
 	jobsTeleporters:AddButton({
 		Name = job,
 		Callback = function()
-            if job == "On Break" then
-				ReplicatedStorage.PlayerChannel:FireServer("ChangeJob", "On Break")
-            elseif Workspace.JobButtons[job] then
-                local jobButtonPosition = Workspace.JobButtons[job].Position
-                Workspace.JobButtons[job].Position = localPlayer.Character.HumanoidRootPart.Position
-                task.wait(0.025)
-                Workspace.JobButtons[job].Position = jobButtonPosition
-            end
+			changeJob(job)
 		end
 	})
 end
@@ -126,7 +130,7 @@ jobsFun:AddToggle({
 		local jobNumber = 1
 
 		while jobLoop and task.wait(JOB_LOOP_DELAY) do
-			ReplicatedStorage.PlayerChannel:FireServer("TeleportToJob", jobs[jobNumber])
+			changeJob(jobs[jobNumber])
 			if jobNumber >= 6 then
 				jobNumber = 1
 			else
