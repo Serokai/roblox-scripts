@@ -290,6 +290,13 @@ miscUnicorn:AddSlider({
 })
 
 miscOther:AddButton({
+	Name = "Fire Extinguisher",
+	Callback = function()
+		Workspace.Extinguisher.Extinguisher.ClickDetector.Detector:FireServer()
+  	end
+})
+
+miscOther:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
