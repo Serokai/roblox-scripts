@@ -414,6 +414,47 @@ local killDropdown = killTab:AddDropdown({
 	end
 })
 
+local killItem = false
+local clickDebounce = true
+
+killTab:AddToggle({
+	Name = "Kill Item",
+	Default = false,
+	Callback = function(state)
+		local mouse = localPlayer:GetMouse()
+		killItem = state
+
+		while killItem and clickDebounce do
+			mouse.Button1Down:Connect(function()
+				target = mouse.Target
+				if target then
+					if target.Parent:FindFirstChild("HumanoidRootPart") and target.Parent.Humanoid.Health > 0 then
+						local success, _ = pcall(function()
+							killPlayer(target.Parent.Name)
+						end)
+				
+						if not success then
+							OrionLib:MakeNotification({
+								Name = "Failed to kill player",
+								Content = "Targeted player's health: " .. Workspace:FindFirstChild(player).Humanoid.Health,
+								Image = "rbxassetid://6034989550",
+								Time = 5
+							})
+						end
+					end
+				end
+			end)
+
+			clickDebounce = false
+			task.defer(function()
+				clickDebounce = true
+			end)
+
+			task.wait(0.5)
+		end
+	end
+})
+
 local miscTab = wappWindow:MakeTab({
 	Name = "Miscellaneous",
 	Icon = "rbxassetid://6034509993",
