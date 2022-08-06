@@ -298,6 +298,11 @@ for gearName, remoteDetector in pairs(gears) do
 	itemsGears:AddButton({
 		Name = gearName,
 		Callback = function()
+			if gearName == "Fire Extinguisher" then
+				Workspace.GameService.ExtinguisherUnequiped:FireServer()
+			end
+
+			task.wait(0.5)
 			remoteDetector:FireServer()
 		end
 	})
