@@ -48,6 +48,9 @@ local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Brea
 local JOB_LOOP_DELAY = 0.25
 local jobLoop = false
 
+local UNICORN_LOOP_DELAY = 0.5
+local spamUnicorn = false
+
 local wappWindow = OrionLib:MakeWindow({
     Name = "🍕 · WAAPP Fucker",
     HidePremium = false,
@@ -235,27 +238,21 @@ local miscTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
-local miscFun = miscTab:AddSection({
-	Name = "Fun"
+local miscUnicorn = miscTab:AddSection({
+	Name = "Unicorn"
 })
 
-for _, unicorn in pairs(localPlayer.Backpack:GetChildren("FluffyUnicorn")) do
-	print("unicorn destroyed")
-	ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", unicorn)
-end
+local miscOther = miscTab:AddSection({
+	Name = "Others"
+})
 
-local UNICORN_LOOP_DELAY = 0.5
-local spamUnicorn = false
-
-local unicornToggle = miscFun:AddToggle({
+local unicornToggle = miscUnicorn:AddToggle({
 	Name = "Unicorn Spam [U]",
 	Default = false,
 	Callback = function(state)
 		spamUnicorn = state
 
 		while spamUnicorn and task.wait(UNICORN_LOOP_DELAY) do
-			print("respawning")
-
 			ReplicatedStorage.PlayerChannel:FireServer("GiveItem", 84012460)
 			mouse1click()
 			task.defer(function()
@@ -266,7 +263,7 @@ local unicornToggle = miscFun:AddToggle({
 	end
 })
 
-miscFun:AddBind({
+miscUnicorn:AddBind({
 	Name = "Unicorn Keybind",
 	Default = Enum.KeyCode.U,
 	Hold = false,
@@ -279,7 +276,7 @@ miscFun:AddBind({
 	end
 })
 
-miscFun:AddSlider({
+miscUnicorn:AddSlider({
 	Name = "Delay",
 	Min = 0.05,
 	Max = 1,
@@ -290,6 +287,17 @@ miscFun:AddSlider({
 	Callback = function(delaySeconds)
 		UNICORN_LOOP_DELAY = delaySeconds
 	end
+})
+
+miscOther:AddButton({
+	Name = "Inventory Clear",
+	Callback = function()
+		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
+			if tool:IsA("Tool") then
+				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", tool)
+			end
+		end
+  	end
 })
 
 OrionLib:Init()
