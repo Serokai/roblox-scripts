@@ -260,7 +260,6 @@ local foundGear = {}
 local function findSoda(soda)
 	for _, instance in pairs(Workspace:GetChildren()) do
 		if instance.Name == "SodaTemplate" and instance:IsA("Tool") then
-			print("soda template found")
 			if instance.SodaName.Value == soda then
 				return instance
 			end
@@ -382,8 +381,6 @@ local function getSharkHouse()
 			return houseInstance:FindFirstAncestor("Furniture").Parent.Name
 		end
 	end
-
-	return nil
 end
 
 local function killPlayer(playerName)
@@ -397,7 +394,18 @@ local killDropdown = killTab:AddDropdown({
 	Default = "...",
 	Options = GetPlayers(),
 	Callback = function(player)
-		killPlayer(player)
+		local success, _ = pcall(function()
+			killPlayer()
+		end)
+
+		if not success then
+			OrionLib:MakeNotification({
+				Name = "Failed to kill player",
+				Content = "Targeted player's health: " .. Workspace:FindFirstChild(player).Humanoid.Health,
+				Image = "rbxassetid://6034989550",
+				Time = 5
+			})
+		end
 	end
 })
 
