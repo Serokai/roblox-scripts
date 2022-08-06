@@ -273,7 +273,7 @@ end
 for _, detectorRemote in pairs(Workspace.Houses:GetDescendants()) do
 	if detectorRemote:IsA("RemoteEvent") and detectorRemote.Name == "Detector" and table.find(food, detectorRemote.Parent.Parent.Name) and not table.find(foundFood, detectorRemote.Parent.Parent.Name) then
 		local instance = detectorRemote.Parent.Parent
-		table.insert(foundFood, instance)
+		table.insert(foundFood, instance.Name)
 
 		itemsFood:AddButton({
 			Name = instance.Name,
