@@ -400,7 +400,7 @@ local killDropdown = killTab:AddDropdown({
 	Options = GetPlayers(),
 	Callback = function(player)
 		local success, _ = pcall(function()
-			killPlayer()
+			killPlayer(player)
 		end)
 
 		if not success then
@@ -420,13 +420,35 @@ local miscTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
+local function getPlayerHouse(playerName)
+	local houses = {}
+
+	for _, house in pairs(Workspace.Houses:GetChildren()) do
+		if house.Owner.Value == nil then continue end
+		houses[house.Owner.Value] = house
+	end
+
+	return table.find(houses, playerName)
+end
+
+local houseDropdown = miscTab:AddDropdown({
+	Name = "Teleport to House",
+	Default = "...",
+	Options = GetPlayers(),
+	Callback = function(player)
+		print(getPlayerHouse(player))
+	end
+})
+
 Players.PlayerAdded:Connect(function(player)
 	killDropdown:Refresh(GetPlayers(), true)
+	houseDropdown:Refresh(GetPlayers(), true)
 	playerTeleportDropdown:Refresh(GetPlayers(), true)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
 	killDropdown:Refresh(GetPlayers(), true)
+	houseDropdown:Refresh(GetPlayers(), true)
 	playerTeleportDropdown:Refresh(GetPlayers(), true)
 end)
 
