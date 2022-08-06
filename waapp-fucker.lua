@@ -88,6 +88,29 @@ playerTab:AddSlider({
 	end
 })
 
+local function GetPlayers()
+	local players = {}
+
+	for _, player in pairs(Players:GetPlayers()) do
+		if player == localPlayer then continue end
+
+		table.insert(players, player.Name)
+	end
+
+	return players
+end
+
+playerTab:AddDropdown({
+	Name = "Teleport to Player",
+	Default = "...",
+	Options = GetPlayers(),
+	Callback = function(player)
+		if Players:FindFirstChild(player) then
+			localPlayer.Character.HumanoidRootPart.CFrame = Players:FindFirstChild(player).Character.HumanoidRootPart.CFrame
+		end
+	end
+})
+
 local jobsTab = wappWindow:MakeTab({
 	Name = "Jobs",
 	Icon = "rbxassetid://6031075939",
