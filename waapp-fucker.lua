@@ -48,6 +48,17 @@ local locations = {
     }
 }
 
+local outfits = {
+	["Luffy Gear 5"] = {
+		["Shirt"] = 9287093540,
+		["Pants"] = 9287096036,
+		["HairAccessory"] = 9483681003,
+		["Face"] = 20298988,
+		["BackAccessory"] = 7859409322,
+		["WaistAccessory"] = 8144108900
+	},
+}
+
 local jobs = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"}
 local JOB_LOOP_DELAY = 0.25
 local jobLoop = false
@@ -79,6 +90,10 @@ local playerTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
+local playerTeleport = playerTab:AddSection({
+	Name = "Teleport"
+})
+
 local playerWalkspeed = playerTab:AddSection({
 	Name = "Walkspeed"
 })
@@ -91,12 +106,12 @@ local playerAvatar = playerTab:AddSection({
 	Name = "Avatar"
 })
 
-local playerOther = playerTab:AddSection({
-	Name = "Other"
-})
-
 local playerServer = playerTab:AddSection({
 	Name = "Server"
+})
+
+local playerOther = playerTab:AddSection({
+	Name = "Other"
 })
 
 local playerWalkspeedSlider = playerWalkspeed:AddSlider({
@@ -141,18 +156,25 @@ playerJumpPower:AddButton({
   	end
 })
 
-playerAvatar:AddTextbox({
-	Name = "Custom Hat",
+local function getOutfits()
+	local availableOutfits = {}
+
+	for outfit, _ in pairs(outfits) do
+		table.insert(availableOutfits, outfit)
+	end
+
+	return availableOutfits
+end
+
+playerAvatar:AddDropdown({
+	Name = "Custom Outfit",
 	Default = "...",
-	TextDisappear = true,
-	Callback = function(hatId)
-		if type(hatId) == "number" and hatId % 1 == 0 then
-			ReplicatedStorage.PlayerChannel:FireServer("LoadAvatarAsset", hatId, "HatAccessory")
-		else
-			StarterGui:SetCore(
-            	"SendNotification",
-            	{Title = "⛔ - Custom Hat - ⛔", Text = "Invalid hat ID", Duration = 5}
-            )
+	Options = getOutfits(),
+	Callback = function(outfit)
+		for accessoryType, accessoryId in pairs(outfits[outfit]) do
+			print(accessoryType, accessoryId)
+			ReplicatedStorage.PlayerChannel:FireServer("LoadAvatarAsset", accessoryId, accessoryType)
+			task.wait(0.25)
 		end
 	end
 })
@@ -222,7 +244,7 @@ local function GetPlayers()
 	return players
 end
 
-local playerTeleportDropdown = playerTab:AddDropdown({
+local playerTeleportDropdown = playerTeleport:AddDropdown({
 	Name = "Teleport to Player",
 	Default = "...",
 	Options = GetPlayers(),
@@ -400,9 +422,11 @@ for _, detectorRemote in pairs(Workspace.Houses:GetDescendants()) do
 
 				if table.find(sodas, instance.Name) then
 					task.wait(1)
+					local soda = findSoda(instance.Name)
 
-					if findSoda(instance.Name) == nil then return end
-					findSoda(instance.Name).Handle.Position = localPlayer.Character.HumanoidRootPart.Position
+					if soda == nil then return end
+					soda.Handle.CanCollide = false
+					soda.Handle.Position = localPlayer.Character.HumanoidRootPart.Position
 				end
 			end
 		})
