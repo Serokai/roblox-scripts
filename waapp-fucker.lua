@@ -500,13 +500,13 @@ miscCar:AddBind({
 
 			StarterGui:SetCore(
                 "SendNotification",
-            	{Title = "✅ - Select Car - ✅", Text = "✅ - SUCCESS; Selected part is not a car", Duration = 5}
+            	{Title = "✅ - Select Car - ✅", Text = "Selected part is a car", Duration = 5}
             )
 		else
 			chosenCar = nil
 			StarterGui:SetCore(
                 "SendNotification",
-            	{Title = "⛔ - Select Car - ⛔", Text = "⛔ - FAILED; Selected part is not a car", Duration = 5}
+            	{Title = "⛔ - Select Car - ⛔", Text = "Selected part is not a car", Duration = 5}
             )
 		end
 	end
@@ -540,21 +540,12 @@ rainbowCarToggle = miscCar:AddToggle({
 
 			StarterGui:SetCore(
                 "SendNotification",
-            	{Title = "⛔ - Enable Rainbow Car - ⛔", Text = "⛔ - FAILED; No selected car", Duration = 5}
+            	{Title = "⛔ - Enable Rainbow Car - ⛔", Text = "No selected car", Duration = 5}
             )
 		end
 
-		while rainbowCarLoop and task.wait(RAINBOW_CAR_LOOP_DELAY) do
-			if chosenCar ~= nil then
-				changeCarColors(chosenCar)
-			else
-				rainbowCarToggle:Set(false)
-
-				StarterGui:SetCore(
-                "SendNotification",
-            	{Title = "⛔ - Rainbow Car - ⛔", Text = "⛔ - STOPPED; Car not found", Duration = 5}
-            )
-			end
+		while rainbowCarLoop and chosenCar ~= nil and task.wait(RAINBOW_CAR_LOOP_DELAY) do
+			changeCarColors(chosenCar)
 		end
 	end
 })
