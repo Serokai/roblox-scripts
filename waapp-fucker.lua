@@ -12,7 +12,7 @@ local localPlayer = Players.LocalPlayer
 
 local locations = {
     [1] = {
-        ["Name"] = "Pizza Place",
+        ["Name"] = "🍕 • Pizza Place",
         ["Locations"] = {
             [1] = {"Cashier Area", ("44, 4, 81")},
             [2] = {"Cooking Area", ("44, 4, 66")},
@@ -27,7 +27,7 @@ local locations = {
         }
     },
     [2] = {
-        ["Name"] = "Islands",
+        ["Name"] = "🏝️ • Islands",
         ["Locations"] = {
             [1] = {"Pirate Island", ("-953, 8, 685")},
             [2] = {"Treasure Island", ("-1761, 100, -1333")},
@@ -35,7 +35,7 @@ local locations = {
         }
     },
     [3] = {
-        ["Name"] = "Miscellaneous",
+        ["Name"] = "✨ • Miscellaneous",
         ["Locations"] = {
             [1] = {"Spawn Area", ("47, 3, 185")},
             [2] = {"Skeleton Cave", ("-251, -23, -950")},
@@ -91,27 +91,27 @@ local playerTab = wappWindow:MakeTab({
 })
 
 local playerTeleport = playerTab:AddSection({
-	Name = "Teleport"
+	Name = "🌌 • Teleport"
 })
 
 local playerWalkspeed = playerTab:AddSection({
-	Name = "Walkspeed"
+	Name = "⚡ • Walkspeed"
 })
 
 local playerJumpPower = playerTab:AddSection({
-	Name = "Jump Power"
+	Name = "🦘 • Jump Power"
 })
 
 local playerAvatar = playerTab:AddSection({
-	Name = "Avatar"
+	Name = "🗿 • Avatar"
 })
 
 local playerServer = playerTab:AddSection({
-	Name = "Server"
+	Name = "📫 • Server"
 })
 
 local playerOther = playerTab:AddSection({
-	Name = "Other"
+	Name = "📁 • Other"
 })
 
 local playerWalkspeedSlider = playerWalkspeed:AddSlider({
@@ -262,15 +262,15 @@ local jobsTab = wappWindow:MakeTab({
 })
 
 local jobsTeleporters = jobsTab:AddSection({
-	Name = "Select Job"
+	Name = "👔 • Select Job"
 })
 
 local jobsSpam = jobsTab:AddSection({
-	Name = "Job Spam"
+	Name = "🎯 • Job Spam"
 })
 
 local jobsSettings = jobsTab:AddSection({
-	Name = "Job Settings"
+	Name = "⚙️ • Job Settings"
 })
 
 local function changeJob(job)
@@ -370,19 +370,15 @@ local itemsTab = wappWindow:MakeTab({
 })
 
 local itemsGears = itemsTab:AddSection({
-	Name = "Gears"
+	Name = "⚔️ • Gears"
 })
 
 local itemsFood = itemsTab:AddSection({
-	Name = "Food"
-})
-
-local itemsUnicorn = itemsTab:AddSection({
-	Name = "Unicorn"
+	Name = "🍗 • Food"
 })
 
 local itemsOther = itemsTab:AddSection({
-	Name = "Other"
+	Name = "📁 Other"
 })
 
 local food = {"Bloxy Cola", "Ice Cream", "Turkey Leg", "Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender", "Pizza", "Witch's Brew", "Sprite", "Dr Pepper", "Coke", "Monster", "Mountain Dews", "Pepsi", "Grill", "Coffee Maker"}
@@ -447,49 +443,6 @@ for gearName, remoteDetector in pairs(gears) do
 	})
 end
 
-local unicornToggle = itemsUnicorn:AddToggle({
-	Name = "Unicorn Spam [U]",
-	Default = false,
-	Callback = function(state)
-		spamUnicorn = state
-
-		while spamUnicorn and task.wait(UNICORN_LOOP_DELAY) do
-			ReplicatedStorage.PlayerChannel:FireServer("GiveItem", 84012460)
-			mouse1click()
-			task.defer(function()
-				task.wait(UNICORN_LOOP_DELAY)
-				ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", localPlayer.Backpack["Fluffy Unicorn"])
-			end)
-		end
-	end
-})
-
-itemsUnicorn:AddBind({
-	Name = "Unicorn Keybind",
-	Default = Enum.KeyCode.U,
-	Hold = false,
-	Callback = function()
-		if spamUnicorn == true then
-			unicornToggle:Set(false)
-		else
-			unicornToggle:Set(true)
-		end
-	end
-})
-
-itemsUnicorn:AddSlider({
-	Name = "Delay",
-	Min = 0.05,
-	Max = 1,
-	Default = 0.5,
-	Color = Color3.fromRGB(238, 15, 238),
-	Increment = 0.05,
-	ValueName = "Second(s)",
-	Callback = function(delaySeconds)
-		UNICORN_LOOP_DELAY = delaySeconds
-	end
-})
-
 itemsOther:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
@@ -505,12 +458,6 @@ itemsOther:AddButton({
 			end
 		end
   	end
-})
-
-local autofarmTab = wappWindow:MakeTab({
-	Name = "Autofarm",
-	Icon = "rbxassetid://6035202043",
-	PremiumOnly = false
 })
 
 local killTab = wappWindow:MakeTab({
@@ -601,6 +548,12 @@ mouse.Button1Down:Connect(function()
 	end
 end)
 
+local autofarmTab = wappWindow:MakeTab({
+	Name = "Autofarm",
+	Icon = "rbxassetid://6035202043",
+	PremiumOnly = false
+})
+
 local miscTab = wappWindow:MakeTab({
 	Name = "Miscellaneous",
 	Icon = "rbxassetid://6034509993",
@@ -608,11 +561,15 @@ local miscTab = wappWindow:MakeTab({
 })
 
 local miscCar = miscTab:AddSection({
-	Name = "Rainbow Car"
+	Name = "🌈 • Rainbow Car"
+})
+
+local miscUnicorn = miscTab:AddSection({
+	Name = "🦄 • Unicorn"
 })
 
 local miscOther = miscTab:AddSection({
-	Name = "Other"
+	Name = "📁 • Other"
 })
 
 local function getMouseTarget()
@@ -693,6 +650,53 @@ miscCar:AddSlider({
 	ValueName = "Second(s)",
 	Callback = function(delaySeconds)
 		RAINBOW_CAR_LOOP_DELAY = delaySeconds
+	end
+})
+
+local unicornToggle = miscUnicorn:AddToggle({
+	Name = "Unicorn Spam",
+	Default = false,
+	Callback = function(state)
+		spamUnicorn = state
+
+		while spamUnicorn and task.wait(UNICORN_LOOP_DELAY) do
+			ReplicatedStorage.PlayerChannel:FireServer("GiveItem", 84012460)
+			mouse1click()
+			task.defer(function()
+				task.wait(UNICORN_LOOP_DELAY)
+				for _, unicorn in pairs(localPlayer.Backpack:GetChildren()) do
+					if unicorn:IsA("Tool") and unicorn.Name == "Fluffy Unicorn" then
+						ReplicatedStorage.PlayerChannel:FireServer("RemoveGear", localPlayer.Backpack["Fluffy Unicorn"])
+					end
+				end
+			end)
+		end
+	end
+})
+
+miscUnicorn:AddBind({
+	Name = "Unicorn Keybind",
+	Default = Enum.KeyCode.U,
+	Hold = false,
+	Callback = function()
+		if spamUnicorn == true then
+			unicornToggle:Set(false)
+		else
+			unicornToggle:Set(true)
+		end
+	end
+})
+
+miscUnicorn:AddSlider({
+	Name = "Delay",
+	Min = 0.05,
+	Max = 1,
+	Default = 0.5,
+	Color = Color3.fromRGB(238, 15, 238),
+	Increment = 0.05,
+	ValueName = "Second(s)",
+	Callback = function(delaySeconds)
+		UNICORN_LOOP_DELAY = delaySeconds
 	end
 })
 
