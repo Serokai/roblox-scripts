@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 local Workspace = game:GetService("Workspace")
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -15,9 +16,9 @@ local locations = {
             [3] = {"Boxing Area", ("47, 4, 20")},
             [4] = {"Delivering Area", ("59, 4, -18")},
             [5] = {"Supplying Area", ("7, 13, -1032")},
-            [6] = {"Manager Office", ("37, 4, 6")},
-            [7] = {"Kick Manager", ("16, 4, 21")},
-            [8] = {"Unloading Area", ("20, 9, -20")},
+			[6] = {"Unloading Area", ("20, 9, -20")},
+            [7] = {"Manager Office", ("37, 4, 6")},
+            [8] = {"Kick Manager", ("16, 4, 21")},
             [9] = {"Hideout", ("76, 10, 66")},
             [10] = {"Parking Lots", ("66, 3, -80")}
         }
@@ -244,8 +245,8 @@ local itemsUnicorn = itemsTab:AddSection({
 	Name = "Unicorn"
 })
 
-local itemsOthers = itemsTab:AddSection({
-	Name = "Others"
+local itemsOther = itemsTab:AddSection({
+	Name = "Other"
 })
 
 local food = {"Bloxy Cola", "Ice Cream", "Turkey Leg", "Popcorn Machine", "Cotton Candy Machine", "Treat Bowl", "Toaster", "Blender", "Pizza", "Witch's Brew", "Sprite", "Dr Pepper", "Coke", "Monster", "Mountain Dews", "Pepsi", "Grill", "Coffee Maker"}
@@ -351,7 +352,7 @@ itemsUnicorn:AddSlider({
 	end
 })
 
-itemsOthers:AddButton({
+itemsOther:AddButton({
 	Name = "Inventory Clear",
 	Callback = function()
 		for _, tool in pairs(Workspace:FindFirstChild(localPlayer.Name):GetChildren()) do
@@ -468,6 +469,100 @@ local miscTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
+local miscCar = miscTab:AddSection({
+	Name = "Car"
+})
+
+local miscOther = miscTab:AddSection({
+	Name = "Other"
+})
+
+local rainbowCarLoop = false
+local chosenCar = nil
+local RAINBOW_CAR_LOOP_DELAY = 0.5
+
+local function getMouseTarget()
+	local cursorPosition = game:GetService("UserInputService"):GetMouseLocation()
+	local oray = game.workspace.CurrentCamera:ViewportPointToRay(cursorPosition.x, cursorPosition.y, 0)
+	local ray = Ray.new(game.Workspace.CurrentCamera.CFrame.p,(oray.Direction * 1000))
+	return workspace:FindPartOnRay(ray)
+end
+
+miscCar:AddBind({
+	Name = "Select Car (Hover any car's part)",
+	Default = Enum.KeyCode.C,
+	Hold = false,
+	Callback = function()
+		local part, _ = getMouseTarget()
+
+		if part:FindFirstAncestor("Car") then
+			chosenCar = part.Parent
+
+			StarterGui:SetCore(
+                "SendNotification",
+            	{Title = "✅ - Select Car - ✅", Text = "✅ - SUCCESS; Selected part is not a car", Duration = 5}
+            )
+		else
+			chosenCar = nil
+			StarterGui:SetCore(
+                "SendNotification",
+            	{Title = "⛔ - Select Car - ⛔", Text = "⛔ - FAILED; Selected part is not a car", Duration = 5}
+            )
+		end
+	end
+})
+
+local carColors = {"1004", "1017", "1009", "1020", "1019", "1010", "1032", "1031"}
+local colorValue = 1
+
+local function changeCarColors(car)
+	if colorValue >= 7 then
+		colorValue = 1
+	end
+
+	for _, carPart in pairs(car:GetChildren()) do
+		if carPart:IsA("Part") then
+			ReplicatedStorage.VehicleChannel:FireServer("Paint", carPart, "None", tonumber(carColors[colorValue]))
+		end
+	end
+
+	colorValue += 1
+end
+
+rainbowCarToggle = miscCar:AddToggle({
+	Name = "Enable Rainbow Car",
+	Default = false,
+	Callback = function(state)
+		rainbowCarLoop = state
+
+		if state == true and chosenCar == nil then
+			rainbowCarToggle:Set(false)
+
+			StarterGui:SetCore(
+                "SendNotification",
+            	{Title = "⛔ - Enable Rainbow Car - ⛔", Text = "⛔ - FAILED; No selected car", Duration = 5}
+            )
+		end
+
+		while rainbowCarLoop and chosenCar ~= nil and task.wait(RAINBOW_CAR_LOOP_DELAY) do
+			changeCarColors(chosenCar)
+		end
+	end
+})
+
+miscCar:AddSlider({
+	Name = "Rainbow Car's Delay",
+	Min = 0.05,
+	Max = 1,
+	Default = 0.5,
+	Color = Color3.fromRGB(228, 34, 0),
+	Increment = 0.05,
+	ValueName = "Second(s)",
+	Callback = function(delaySeconds)
+		RAINBOW_CAR_LOOP_DELAY = delaySeconds
+	end
+})
+
 local function getPlayerHouse(playerName)
 	local houses = {}
 
@@ -479,7 +574,7 @@ local function getPlayerHouse(playerName)
 	return table.find(houses, playerName)
 end
 
-local houseDropdown = miscTab:AddDropdown({
+local houseDropdown = miscOther:AddDropdown({
 	Name = "Teleport to House",
 	Default = "...",
 	Options = GetPlayers(),
