@@ -495,12 +495,12 @@ miscCar:AddBind({
 	Callback = function()
 		local part, _ = getMouseTarget()
 
-		if part:FindFirstAncestor("Car") then
+		if part:FindFirstAncestor("Car") and part:FindFirstAncestor("Car") ~= chosenCar then
 			chosenCar = part.Parent
 
 			StarterGui:SetCore(
-                "SendNotification",
-            	{Title = "✅ - Select Car - ✅", Text = "Selected part is a car", Duration = 5}
+            	"SendNotification",
+            	{Title = "✅ - Select Car - ✅", Text = "New car set", Duration = 5}
             )
 		else
 			StarterGui:SetCore(
@@ -579,6 +579,33 @@ local houseDropdown = miscOther:AddDropdown({
 	Options = GetPlayers(),
 	Callback = function(player)
 		print(getPlayerHouse(player))
+	end
+})
+
+local partyIslandPosition = Workspace["Teleport to Party Island"].Head.Position
+local removeManagerPosition = Workspace["Remove Manager"].Head.Position
+
+miscOther:AddToggle({
+	Name = "Disable Party Island",
+	Default = false,
+	Callback = function(state)
+		if state == true then
+			Workspace["Teleport to Party Island"].Head.Position = Vector3.new(0, 0, 0)
+		else
+			Workspace["Teleport to Party Island"].Head.Position = partyIslandPosition
+		end
+	end
+})
+
+miscOther:AddToggle({
+	Name = "Disable Manager Kick",
+	Default = false,
+	Callback = function(state)
+		if state == true then
+			Workspace["Remove Manager"].Head.Position = Vector3.new(0, 0, 0)
+		else
+			Workspace["Remove Manager"].Head.Position = removeManagerPosition
+		end
 	end
 })
 
