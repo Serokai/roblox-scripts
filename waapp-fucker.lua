@@ -503,7 +503,6 @@ miscCar:AddBind({
             	{Title = "✅ - Select Car - ✅", Text = "Selected part is a car", Duration = 5}
             )
 		else
-			chosenCar = nil
 			StarterGui:SetCore(
                 "SendNotification",
             	{Title = "⛔ - Select Car - ⛔", Text = "Selected part is not a car", Duration = 5}
