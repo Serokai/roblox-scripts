@@ -544,8 +544,17 @@ rainbowCarToggle = miscCar:AddToggle({
             )
 		end
 
-		while rainbowCarLoop and chosenCar ~= nil and task.wait(RAINBOW_CAR_LOOP_DELAY) do
-			changeCarColors(chosenCar)
+		while rainbowCarLoop and task.wait(RAINBOW_CAR_LOOP_DELAY) do
+			if chosenCar ~= nil then
+				changeCarColors(chosenCar)
+			else
+				rainbowCarToggle:Set(false)
+
+				StarterGui:SetCore(
+                "SendNotification",
+            	{Title = "⛔ - Rainbow Car - ⛔", Text = "⛔ - STOPPED; Car not found", Duration = 5}
+            )
+			end
 		end
 	end
 })
