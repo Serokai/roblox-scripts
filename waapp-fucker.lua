@@ -1,5 +1,6 @@
 --?-- [ Services ] --?--
 
+local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local StarterGui = game:GetService("StarterGui")
@@ -9,6 +10,10 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
 --?-- [ Library Initialization ] --?--
+
+while not game:IsLoaded() do
+	task.wait()
+end
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
@@ -30,17 +35,27 @@ local function sendNotification(title: string, text: number)
 	})
 end
 
+local function getMouseTarget()
+	local cursorPosition = UserInputService:GetMouseLocation()
+	local oray = Workspace.CurrentCamera:ViewportPointToRay(cursorPosition.x, cursorPosition.y, 0)
+	local ray = Ray.new(Workspace.CurrentCamera.CFrame.p,(oray.Direction * 1000))
+	return workspace:FindPartOnRay(ray)
+end
+
 ---------- ! ---------- [ 👨🏻‍💼 Player 👨🏻‍💼 ] ---------- ! ----------
 
 local PLAYER_TAB = WAAPP_WINDOW:MakeTab({Name = "Player", Icon = "rbxassetid://6034287594", PremiumOnly = false})
 local PLAYER_TELEPORT = PLAYER_TAB:AddSection({Name = "🌌 • Teleport"})
 local PLAYER_WALKSPEED = PLAYER_TAB:AddSection({Name = "⚡ • Walkspeed"})
 local PLAYER_JUMP_POWER = PLAYER_TAB:AddSection({Name = "🦘 • Jump Power"})
+local PLAYER_KILL = PLAYER_TAB:AddSection({Name = "🔪 • Kill"})
 local PLAYER_AVATAR = PLAYER_TAB:AddSection({Name = "🗿 • Avatar"})
 local PLAYER_SERVER = PLAYER_TAB:AddSection({Name = "📫 • Server"})
 local PLAYER_OTHER = PLAYER_TAB:AddSection({Name = "📁 • Other"})
 
 local LOCAL_PLAYER = Players.LocalPlayer
+local clickToKill = false
+local loopKillAll = false
 local noClip = false
 
 local Outfits = {
@@ -52,12 +67,64 @@ local Outfits = {
 		["BackAccessory"] = 7859409322,
 		["WaistAccessory"] = 8144108900
 	},
+	["Roronoa Zoro"] = {
+---@diagnostic disable-next-line: duplicate-index
+		["HatAccessory"] = 6565124336,
+---@diagnostic disable-next-line: duplicate-index
+		["HatAccessory"] = 8928807994,
+---@diagnostic disable-next-line: duplicate-index
+		["HatAccessory"] = 5314840741,
+		["Shirt"] = 9647613760,
+		["Pants"] = 9647602267,
+---@diagnostic disable-next-line: duplicate-index
+		["HairAccessory"] = 9647602267,
+---@diagnostic disable-next-line: duplicate-index
+		["HairAccessory"] = 5158846147,
+		["Face"] = 2936946480,
+		["FaceAccessory"] = 2936946480,
+		["BackAccessory"] = 9121730585,
+		["WaistAccessory"] = 6347094572
+	},
 }
+
+local function killPlayer(playerName: string)
+	if Workspace.Houses:FindFirstChild("Shark Tank", true) then
+		local sharkTank = Workspace.Houses:FindFirstChild("Shark Tank", true)
+		if Players:FindFirstChild(playerName) then
+			print(playerName)
+			sharkTank.TouchEvent:FireServer(Workspace:FindFirstChild(playerName).Head, sharkTank.Shark)
+		end
+	end
+end
+
+local function findCatalogAssetId(accessory, plr) -- @Q_Q on Devforum
+	local char = plr.Character
+	local _,assets = pcall(function()return Players:GetCharacterAppearanceInfoAsync(plr.userId).assets end)
+	
+	if char and assets and type(assets) == "table" then
+		
+		for _,assetInfo in pairs(assets) do -- Recurse for accessory information.
+			if string.find(assetInfo.assetType.name,"Accessory") or assetInfo.assetType.name == "Hat" then
+				local attemptedId = assetInfo.id
+				local foundHat = nil
+				
+				local _,Hat = pcall(function()return InsertService:LoadAsset(attemptedId)end)
+				local insertedHat = Hat and Hat:GetChildren()[1]
+				
+				foundHat = insertedHat and char:FindFirstChild(insertedHat.Name)
+
+				if foundHat and foundHat.Name == accessory.Name then
+					return attemptedId
+				end
+			end
+		end
+	end
+end
 
 local function getPlayers()
 	local players = {}
 
-	for _, player in pairs(Players:getPlayers()) do
+	for _, player in pairs(Players:GetPlayers()) do
 		if player == LOCAL_PLAYER then continue end
 
 		table.insert(players, player.Name)
@@ -118,13 +185,47 @@ PLAYER_JUMP_POWER:AddButton({
   	end
 })
 
+local KILL_DROPDOWN = PLAYER_KILL:AddDropdown({
+	Name = "Kill Player",
+	Default = "...",
+	Options = getPlayers(),
+	Callback = function(playerName)
+		killPlayer(playerName)
+	end
+})
+
+KILL_LOOP_KILL_ALL = PLAYER_KILL:AddToggle({
+	Name = "Loop Kill All",
+	Default = false,
+	Callback = function(state)
+		loopKillAll = state
+
+		while loopKillAll == true and task.wait(0.1) do
+			for _, player in pairs(Players:GetPlayers()) do
+				if player.Name ~= LOCAL_PLAYER.Name then
+					killPlayer(player.Name)
+					task.wait(0.25)
+				end
+			end
+		end
+	end
+})
+
+PLAYER_KILL:AddToggle({
+	Name = "Click to Kill",
+	Default = false,
+	Callback = function(state)
+		clickToKill = state
+	end
+})
+
 PLAYER_AVATAR:AddDropdown({
 	Name = "Custom Outfit",
 	Default = "...",
 	Options = getOutfits(),
 	Callback = function(outfit)
+		ReplicatedStorage.PlayerChannel:FireServer("ResetAvatarAppearance", true)
 		for accessoryType, accessoryId in pairs(Outfits[outfit]) do
-			print(accessoryType, accessoryId)
 			ReplicatedStorage.PlayerChannel:FireServer("LoadAvatarAsset", accessoryId, accessoryType)
 			task.wait(0.25)
 		end
@@ -194,6 +295,17 @@ local PLAYER_TELEPORT_DROPDOWN = PLAYER_TELEPORT:AddDropdown({
 		end
 	end
 })
+
+LOCAL_PLAYER:GetMouse().Button1Down:Connect(function()
+	local part, _ = getMouseTarget()
+	if clickToKill == true then
+		if Players:FindFirstChild(part:FindFirstAncestorWhichIsA("Model").Name) and part:FindFirstAncestorWhichIsA("Model").Name ~= LOCAL_PLAYER.Name then
+			killPlayer(part:FindFirstAncestorWhichIsA("Model").Name)
+		else
+			sendNotification("⛔ • Click To Kill", "Selected part is not a player")
+		end
+	end
+end)
 
 ---------- ! ---------- [ 👔 Jobs 👔 ] ---------- ! ----------
 
@@ -314,22 +426,33 @@ local Locations = {
     }
 }
 
-for _, value in ipairs(Locations) do
-    local dropdownLocations = {}
+local function returnCategoryLocations(locations)
+	local locationsTable = {}
 
-	local zoneSection = LOCATIONS_TAB:AddSection({
-		Name = value["Name"]
-	})
-
-	for _, areaValue in pairs(value["Locations"]) do
-        table.insert(dropdownLocations, areaValue[1])
-		zoneSection:AddButton({
-			Name = areaValue[1],
-			Callback = function()
-				LOCAL_PLAYER.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(areaValue[2]:match("(.+), (.+), (.+)")))
-			end
-		})
+	for _, value in ipairs(locations) do
+		table.insert(locationsTable, value[1])
 	end
+
+	return locationsTable
+end
+
+local function getLocationCoordinates(locations, locationToTeleport)
+	for _, value in ipairs(locations) do
+		if value[1] == locationToTeleport then
+			return value[2]
+		end
+	end
+end
+
+for _, value in ipairs(Locations) do
+	local dropdownLocation = LOCATIONS_TAB:AddDropdown({
+		Name = value["Name"],
+		Default = "...",
+		Options = returnCategoryLocations(value["Locations"]),
+		Callback = function(locationToTeleport)
+			LOCAL_PLAYER.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(getLocationCoordinates(value["Locations"], locationToTeleport):match("(.+), (.+), (.+)")))
+		end
+	})
 end
 
 ---------- ! ---------- [ 🏷️ Items 🏷️ ] ---------- ! ----------
@@ -416,88 +539,6 @@ for gearName, remoteDetector in pairs(Gears) do
 	})
 end
 
----------- ! ---------- [ 🔪 Kill 🔪 ] ---------- ! ----------
-
-local KILL_TAB = WAAPP_WINDOW:MakeTab({Name = "Kill", Icon = "rbxassetid://6034989550", PremiumOnly = false})
-
-local mouse = LOCAL_PLAYER:GetMouse()
-local killItem = false
-local canKillItem = true
-
-local function killPlayer(playerName)
-	local function getSharkHouse()
-		for _, houseInstance in pairs(Workspace.Houses:GetDescendants()) do
-			if houseInstance.Name == "Shark" and houseInstance:FindFirstChild("BodyGyro") then
-				return houseInstance:FindFirstAncestor("Furniture").Parent.Name
-			end
-		end
-
-		sendNotification("⛔ • Kill Player", "No shark has been found")
-	end
-
-	if Players:FindFirstChild(playerName) then
-		Workspace.Houses[getSharkHouse()].Furniture["Shark Tank"].TouchEvent:FireServer(Workspace:FindFirstChild(playerName).Head, Workspace.Houses[getSharkHouse()].Furniture["Shark Tank"].Shark)
-	end
-end
-
-local function getNearestPlayer()
-    local part = LOCAL_PLAYER.Character.HumanoidRootPart
-	local maxDistance = 25
-
-	local nearestPlayer, nearestDistance
-	for _, player in pairs(Players:getPlayers()) do
-		if player.Name == LOCAL_PLAYER.Name then continue end
-
-		local character = player.Character
-		local distance = player:DistanceFromCharacter(part.Position)
-		if not character or 
-			distance > maxDistance or
-			(nearestDistance and distance >= nearestDistance)
-		then
-			continue
-		end
-		nearestDistance = distance
-		nearestPlayer = player
-	end
-	
-	return nearestPlayer
-end
-
-local KILL_DROPDOWN = KILL_TAB:AddDropdown({
-	Name = "Kill Player",
-	Default = "...",
-	Options = getPlayers(),
-	Callback = function(player)
-		local success, _ = pcall(function()
-			killPlayer(player)
-		end)
-
-		if not success then
-			warn(error)
-		end
-	end
-})
-
-KILL_TAB:AddToggle({
-	Name = "Kill Item",
-	Default = false,
-	Callback = function(state)
-		killItem = state
-	end
-})
-
-mouse.Button1Down:Connect(function()
-	if killItem and canKillItem == true then
-		killPlayer(getNearestPlayer().Name)
-
-		canKillItem = false
-		task.defer(function()
-			task.wait(0.5)
-			canKillItem = true
-		end)
-	end
-end)
-
 ---------- ! ---------- [ 🤖 Autofarm 🤖 ] ---------- ! ----------
 
 -- local autofarmTab = wappWindow:MakeTab({
@@ -525,13 +566,6 @@ local spamUnicorn = false
 local partyIslandPosition = Workspace["Teleport to Party Island"].Head.Position
 local removeManagerPosition = Workspace["Remove Manager"].Head.Position
 local lostCoordinates = Vector3.new(999, 999, 999)
-
-local function getMouseTarget()
-	local cursorPosition = UserInputService:GetMouseLocation()
-	local oray = Workspace.CurrentCamera:ViewportPointToRay(cursorPosition.x, cursorPosition.y, 0)
-	local ray = Ray.new(Workspace.CurrentCamera.CFrame.p,(oray.Direction * 1000))
-	return workspace:FindPartOnRay(ray)
-end
 
 local function changeCarColors(car)
 	if colorValue >= 7 then
