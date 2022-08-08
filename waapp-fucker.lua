@@ -1,6 +1,9 @@
+local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -52,6 +55,16 @@ local jobLoop = false
 local UNICORN_LOOP_DELAY = 0.5
 local spamUnicorn = false
 
+local rainbowCarLoop = false
+local chosenCar = nil
+local RAINBOW_CAR_LOOP_DELAY = 0.5
+
+local noClip = false
+
+local partyIslandPosition = Workspace["Teleport to Party Island"].Head.Position
+local removeManagerPosition = Workspace["Remove Manager"].Head.Position
+local lostCoordinates = Vector3.new(999, 999, 999)
+
 local wappWindow = OrionLib:MakeWindow({
     Name = "🍕 · WAAPP Fucker",
     HidePremium = false,
@@ -66,7 +79,27 @@ local playerTab = wappWindow:MakeTab({
 	PremiumOnly = false
 })
 
-playerTab:AddSlider({
+local playerWalkspeed = playerTab:AddSection({
+	Name = "Walkspeed"
+})
+
+local playerJumpPower = playerTab:AddSection({
+	Name = "Jump Power"
+})
+
+local playerAvatar = playerTab:AddSection({
+	Name = "Avatar"
+})
+
+local playerOther = playerTab:AddSection({
+	Name = "Other"
+})
+
+local playerServer = playerTab:AddSection({
+	Name = "Server"
+})
+
+local playerWalkspeedSlider = playerWalkspeed:AddSlider({
 	Name = "Walkspeed",
 	Min = 1,
 	Max = 150,
@@ -79,7 +112,15 @@ playerTab:AddSlider({
 	end
 })
 
-playerTab:AddSlider({
+playerWalkspeed:AddButton({
+	Name = "Reset Walkspeed",
+	Callback = function()
+		localPlayer.Character.Humanoid.WalkSpeed = 16
+		playerWalkspeedSlider:Set(16)
+  	end
+})
+
+local playerJumpPowerSlider = playerJumpPower:AddSlider({
 	Name = "Jump Power",
 	Min = 1,
 	Max = 350,
@@ -89,6 +130,83 @@ playerTab:AddSlider({
 	ValueName = "Jump Power",
 	Callback = function(jumpPower)
 		localPlayer.Character.Humanoid.JumpPower = jumpPower
+	end
+})
+
+playerJumpPower:AddButton({
+	Name = "Reset Jump Power",
+	Callback = function()
+		localPlayer.Character.Humanoid.JumpPower = 50
+		playerJumpPowerSlider:Set(50)
+  	end
+})
+
+playerAvatar:AddTextbox({
+	Name = "Custom Hat",
+	Default = "...",
+	TextDisappear = true,
+	Callback = function(hatId)
+		if type(hatId) == "number" and hatId % 1 == 0 then
+			ReplicatedStorage.PlayerChannel:FireServer("LoadAvatarAsset", hatId, "HatAccessory")
+		else
+			StarterGui:SetCore(
+            	"SendNotification",
+            	{Title = "⛔ - Custom Hat - ⛔", Text = "Invalid hat ID", Duration = 5}
+            )
+		end
+	end
+})
+
+playerAvatar:AddButton({
+	Name = "Reset Outfit",
+	Callback = function()
+		ReplicatedStorage.PlayerChannel:FireServer("ResetAvatarAppearance", true)
+  	end
+})
+
+playerOther:AddToggle({
+	Name = "NoClip",
+	Default = false,
+	Callback = function(state)
+		noClip = state
+
+		RunService.Stepped:Connect(function()
+			if noClip then
+				localPlayer.Character.Head.CanCollide = false
+				localPlayer.Character.Torso.CanCollide = false
+			end
+		end)
+	end
+})
+
+playerOther:AddButton({
+	Name = "Reset Character",
+	Callback = function()
+		local oldPlayerPosition = localPlayer.Character.HumanoidRootPart.CFrame
+		localPlayer.Character.Humanoid.Health = 0
+		localPlayer.CharacterAdded:Wait()
+		task.wait(1)
+		localPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = oldPlayerPosition
+  	end
+})
+
+playerServer:AddButton({
+	Name = "Rejoin Server",
+	Callback = function()
+		TeleportService:Teleport(game.PlaceId, localPlayer)
+  	end
+})
+
+playerServer:AddButton({
+	Name = "Server Hop",
+	Callback = function()
+		local servers = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/192800/servers/Public?sortOrder=Asc&limit=100"))
+
+		for _, server in pairs(servers.data) do
+			if server.playing ~= server.maxPlayers then
+				TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+			end
+		end
 	end
 })
 
@@ -129,10 +247,6 @@ local jobsSpam = jobsTab:AddSection({
 	Name = "Job Spam"
 })
 
--- local jobsAfk = jobsTab:AddSection({
--- 	Name = "Job AFK"
--- })
-
 local jobsSettings = jobsTab:AddSection({
 	Name = "Job Settings"
 })
@@ -155,14 +269,14 @@ local function changeJob(job)
 	end
 end
 
-for _, job in pairs(jobs) do
-	jobsTeleporters:AddButton({
-		Name = job,
-		Callback = function()
-			changeJob(job)
-		end
-	})
-end
+jobsTeleporters:AddDropdown({
+	Name = "Selected Job",
+	Default = "...",
+	Options = {"Cashier", "Cook", "Pizza Boxer", "Delivery", "Supplier", "On Break"},
+	Callback = function(job)
+		changeJob(job)
+	end
+})
 
 jobsSpam:AddToggle({
 	Name = "Spam",
@@ -470,16 +584,12 @@ local miscTab = wappWindow:MakeTab({
 })
 
 local miscCar = miscTab:AddSection({
-	Name = "Car"
+	Name = "Rainbow Car"
 })
 
 local miscOther = miscTab:AddSection({
 	Name = "Other"
 })
-
-local rainbowCarLoop = false
-local chosenCar = nil
-local RAINBOW_CAR_LOOP_DELAY = 0.5
 
 local function getMouseTarget()
 	local cursorPosition = game:GetService("UserInputService"):GetMouseLocation()
@@ -582,15 +692,12 @@ local houseDropdown = miscOther:AddDropdown({
 	end
 })
 
-local partyIslandPosition = Workspace["Teleport to Party Island"].Head.Position
-local removeManagerPosition = Workspace["Remove Manager"].Head.Position
-
 miscOther:AddToggle({
 	Name = "Disable Party Island",
 	Default = false,
 	Callback = function(state)
 		if state == true then
-			Workspace["Teleport to Party Island"].Head.Position = Vector3.new(0, 0, 0)
+			Workspace["Teleport to Party Island"].Head.Position = lostCoordinates
 		else
 			Workspace["Teleport to Party Island"].Head.Position = partyIslandPosition
 		end
@@ -602,7 +709,7 @@ miscOther:AddToggle({
 	Default = false,
 	Callback = function(state)
 		if state == true then
-			Workspace["Remove Manager"].Head.Position = Vector3.new(0, 0, 0)
+			Workspace["Remove Manager"].Head.Position = lostCoordinates
 		else
 			Workspace["Remove Manager"].Head.Position = removeManagerPosition
 		end
